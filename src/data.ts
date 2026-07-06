@@ -1,4 +1,7 @@
 import { Story, Competition } from "./types";
+import cover1 from "./assets/images/neon_audio_wave_1783326183651.jpg";
+import cover2 from "./assets/images/cosmic_storyteller_1783326194652.jpg";
+import cover3 from "./assets/images/voice_token_1783326206497.jpg";
 
 export const INITIAL_STORIES: Story[] = [
   {
@@ -8,7 +11,7 @@ export const INITIAL_STORIES: Story[] = [
     creatorAddress: "7xKXvS2gY9zpH3RkJwA90sL9Q1K6fL2yS",
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
     duration: "2:14",
-    coverUrl: "/src/assets/images/neon_audio_wave_1783326183651.jpg",
+    coverUrl: cover1,
     description: "An interactive cyber-thriller about an old ledger found in a vintage market, holding millions in SOL, but encrypted with a riddle that leads to Lisbon.",
     transcript: "It was August in Lisbon. The heat was radiating off the pavement. I was scanning a table at a local market when my eyes caught an old, silver metal thumb drive. It had the early Solana logo scratched into it. The seller wanted 2 Euros. Little did I know, this device held the keys to a wallet that hadn't been opened since 2020. But there was a catch—the seed phrase was locked behind a cryptographic audio riddle.",
     tags: ["Cyberpunk", "Adventure", "SolanaSummer", "TrueCrime"],
@@ -31,7 +34,7 @@ export const INITIAL_STORIES: Story[] = [
     creatorAddress: "D9zRPq45vS2gH3RjKwA90sL9Q1K6fL2y",
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
     duration: "3:45",
-    coverUrl: "/src/assets/images/cosmic_storyteller_1783326194652.jpg",
+    coverUrl: cover2,
     description: "The last audio recording sent from Echo-9, a lone explorer vessel drifting near the Sagittarius Arm. Grounded in loneliness, hope, and cosmic beauty.",
     transcript: "Echo-9 to Houston, do you read? The solar sails have stabilized, but the comms array is failing. I am looking out the main portal at the birth of a nebula. It is a canvas of deep violet, cyan, and gold. If this is my final transmission, I want my voice to be preserved. Not in a government database, but scattered permanently among the stars. To anyone listening—remember me by my voice.",
     tags: ["Sci-Fi", "Cosmic", "Drama", "Solo"],
@@ -54,7 +57,7 @@ export const INITIAL_STORIES: Story[] = [
     creatorAddress: "8vRp...Xy89",
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
     duration: "1:58",
-    coverUrl: "/src/assets/images/voice_token_1783326206497.jpg",
+    coverUrl: cover3,
     description: "A profound manifesto on why ownership of human speech matters. Explores the history of centralized platforms and the rise of decentralized audio layers.",
     transcript: "For decades, we gave away our voices. We recorded videos, podcasts, and notes on platforms that took our data, sold ads, and gave us back pennies. But voice is the ultimate signature of the soul. It is unique. By tokenizing our stories, we create a direct economic link between the speaker and the listener. No censors. No middlemen. Only permanent echoes stored forever on Arweave and owned on Solana.",
     tags: ["Manifesto", "Web3", "AudioNFT", "Solana"],

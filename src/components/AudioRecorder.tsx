@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Mic, Square, Trash, Sparkles, Wand2, UploadCloud, ChevronRight, FileAudio, CheckCircle2, ShieldAlert, RefreshCw } from "lucide-react";
 import { Story, WalletState } from "../types";
+import defaultCover from "../assets/images/neon_audio_wave_1783326183651.jpg";
 
 interface AudioRecorderProps {
   wallet: WalletState;
@@ -331,7 +332,7 @@ export default function AudioRecorder({
             creatorAddress: wallet.address,
             audioUrl: audioUrl || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
             duration: formatTime(recordingDuration) || "1:30",
-            coverUrl: "/src/assets/images/neon_audio_wave_1783326183651.jpg", // fallback cover
+            coverUrl: defaultCover, // fallback cover
             description: summary || description || "No AI summary provided.",
             transcript: enhancedTranscript || transcript || "No transcription saved.",
             tags: suggestedTags.length > 0 ? suggestedTags : ["PersonalStory", "VoiceEcho"],
