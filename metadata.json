@@ -1,0 +1,6 @@
+{
+  "name": "Echoes Fans",
+  "description": "The ownership layer for audio stories on Solana. Record, tokenize, store on Arweave, and earn from every trade.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
