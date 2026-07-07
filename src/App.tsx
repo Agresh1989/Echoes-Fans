@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Coins, Mic, Trophy, Shield, Wallet, Zap, Menu, Globe, Share2 } from "lucide-react";
+import { Coins, Mic, Trophy, Shield, Wallet, Zap, Menu, Globe, Share2, Home } from "lucide-react";
 import { INITIAL_STORIES, INITIAL_COMPETITIONS, INITIAL_ACTIVITIES } from "./data";
 import { Story, Competition, WalletState, Trade, PlatformActivity } from "./types";
 import DiscoverFeed from "./components/DiscoverFeed";
 import AudioRecorder from "./components/AudioRecorder";
 import Competitions from "./components/Competitions";
 import WalletDrawer from "./components/WalletDrawer";
+import LandingPage from "./components/LandingPage";
 
 export default function App() {
   // Navigation
-  const [activeTab, setActiveTab] = useState<"discover" | "create" | "competitions">("discover");
+  const [activeTab, setActiveTab] = useState<"home" | "discover" | "create" | "competitions">("home");
 
   // Core Applet State
   const [stories, setStories] = useState<Story[]>(INITIAL_STORIES);
@@ -415,7 +416,10 @@ export default function App() {
         <header className="py-6 flex flex-col md:flex-row items-center justify-between border-b border-neutral-900 gap-6 mb-8" id="primary-brand-header">
           
           {/* Logo Brand with Perfect Alignment */}
-          <div className="flex items-center gap-3.5 text-left w-full md:w-auto">
+          <div 
+            onClick={() => setActiveTab("home")}
+            className="flex items-center gap-3.5 text-left w-full md:w-auto cursor-pointer select-none hover:opacity-90 transition-opacity"
+          >
             {/* High-Fidelity Premium Waveform Logo */}
             <div className="relative w-12 h-12 rounded-2xl bg-neutral-950 border border-neutral-850 flex items-center justify-center overflow-hidden group shrink-0 shadow-lg shadow-purple-950/40">
               {/* Glowing decorative ambient background */}
@@ -453,8 +457,20 @@ export default function App() {
           {/* Navigation Controls */}
           <nav className="flex items-center gap-0.5 sm:gap-1 bg-neutral-950 p-1 sm:p-1.5 border border-neutral-900 rounded-xl sm:rounded-2xl w-full md:w-auto">
             <button
+              onClick={() => setActiveTab("home")}
+              className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                activeTab === "home"
+                  ? "bg-neutral-900 text-white shadow-sm"
+                  : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400 shrink-0" />
+              <span className="truncate">Home</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab("discover")}
-              className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === "discover"
                   ? "bg-neutral-900 text-white shadow-sm"
                   : "text-neutral-400 hover:text-white"
@@ -466,7 +482,7 @@ export default function App() {
 
             <button
               onClick={() => setActiveTab("create")}
-              className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === "create"
                   ? "bg-neutral-900 text-white shadow-sm"
                   : "text-neutral-400 hover:text-white"
@@ -478,7 +494,7 @@ export default function App() {
 
             <button
               onClick={() => setActiveTab("competitions")}
-              className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`flex-1 md:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === "competitions"
                   ? "bg-neutral-900 text-white shadow-sm"
                   : "text-neutral-400 hover:text-white"
@@ -520,6 +536,16 @@ export default function App() {
 
         {/* Content Screens */}
         <main className="min-h-[500px]">
+          {activeTab === "home" && (
+            <LandingPage
+              setActiveTab={setActiveTab}
+              stories={stories}
+              competitions={competitions}
+              wallet={wallet}
+              openWalletDrawer={() => setIsWalletOpen(true)}
+            />
+          )}
+
           {activeTab === "discover" && (
             <DiscoverFeed
               stories={stories}
