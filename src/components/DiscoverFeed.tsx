@@ -33,9 +33,18 @@ export default function DiscoverFeed({
   const [sharesToTrade, setSharesToTrade] = useState<{ [key: string]: number }>({});
   const [tradingStoryId, setTradingStoryId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"info" | "transcript" | "trades" | "arweave">("info");
+  const [tradeMessage, setTradeMessage] = useState<{ text: string; type: "error" | "success" } | null>(null);
 
   // Global Audio controller
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Quick feedback helper
+  const showFeedback = (text: string, type: "error" | "success") => {
+    setTradeMessage({ text, type });
+    setTimeout(() => {
+      setTradeMessage(null);
+    }, 4000);
+  };
 
   // Handle Play/Pause
   const handlePlayPause = (story: Story) => {
@@ -105,7 +114,7 @@ export default function DiscoverFeed({
 
     const count = sharesToTrade[story.id] || 1;
     if (count <= 0) {
-      alert("Please specify a valid share quantity.");
+      showFeedback("Please specify a valid share quantity.", "error");
       return;
     }
 
@@ -113,11 +122,12 @@ export default function DiscoverFeed({
     const totalCost = sharePrice * count;
 
     if (type === "BUY" && wallet.balance < totalCost) {
-      alert("Insufficient Solana SOL balance. Please request an airdrop in your wallet drawer.");
+      showFeedback("Insufficient Solana balance. Please request an airdrop in your wallet drawer.", "error");
       return;
     }
 
     onTrade(story.id, type, count);
+    showFeedback(`Successfully submitted ${type} order for ${count} keys of ${story.symbol}!`, "success");
     // Clear trade input
     setSharesToTrade({ ...sharesToTrade, [story.id]: 1 });
   };
@@ -307,6 +317,20 @@ export default function DiscoverFeed({
                         ))}
                       </div>
 
+                      {/* Dynamic Feed Feedback message indicator */}
+                      {tradeMessage && (
+                        <div className={`p-3 rounded-xl border text-[11px] font-medium leading-snug flex items-center gap-2 ${
+                          tradeMessage.type === "error"
+                            ? "bg-red-500/10 border-red-500/20 text-red-400"
+                            : "bg-teal-500/10 border-teal-500/20 text-teal-300"
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                            tradeMessage.type === "error" ? "bg-red-500" : "bg-teal-400"
+                          }`} />
+                          <p>{tradeMessage.text}</p>
+                        </div>
+                      )}
+
                       {/* Info Tab */}
                       {activeTab === "info" && (
                         <div className="flex flex-col gap-4">
@@ -451,7 +475,7 @@ export default function DiscoverFeed({
                             <button
                               onClick={() => {
                                 navigator.clipboard.writeText(targetStory.arweaveHash);
-                                alert("Arweave transaction hash copied to clipboard!");
+                                showFeedback("Arweave transaction hash copied to clipboard!", "success");
                               }}
                               className="text-neutral-400 hover:text-white border border-neutral-850 px-3 py-1.5 rounded-lg hover:bg-neutral-900 transition-colors text-xxs font-bold"
                             >
@@ -494,64 +518,96 @@ export default function DiscoverFeed({
 
       {/* Persistent Bottom Playback Status Bar */}
       {activeStoryId && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-neutral-950/95 border-t border-neutral-800 p-4 shadow-xl backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-4 max-w-7xl mx-auto rounded-t-3xl">
-          {(() => {
-            const story = stories.find((s) => s.id === activeStoryId)!;
-            return (
-              <>
-                <div className="flex items-center gap-4 w-full md:w-auto">
-                  <img
-                    src={story.coverUrl}
-                    alt={story.title}
-                    className="w-12 h-12 rounded-lg object-cover bg-neutral-900 border border-neutral-800 shrink-0"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div>
-                    <h4 className="text-xs font-bold text-white leading-normal truncate max-w-[200px] md:max-w-xs">
-                      {story.title}
-                    </h4>
-                    <p className="text-[10px] text-neutral-400 mt-0.5">
-                      By <span className="text-purple-400 font-semibold">{story.creatorName}</span>
-                    </p>
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-neutral-950/95 border-t border-neutral-800 shadow-2xl backdrop-blur-md">
+          <div className="max-w-7xl mx-auto px-4 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 relative">
+            
+            {/* Absolute Spotify-style progress bar on mobile, standard inline progress bar on desktop */}
+            <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-neutral-900 md:hidden overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-purple-500 to-teal-400"
+                style={{ width: duration ? `${(currentTime / duration) * 100}%` : "0%" }}
+              ></div>
+            </div>
+
+            {(() => {
+              const story = stories.find((s) => s.id === activeStoryId)!;
+              return (
+                <>
+                  {/* Left: Metadata */}
+                  <div className="flex items-center justify-between md:justify-start gap-4 w-full md:w-auto">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <img
+                        src={story.coverUrl}
+                        alt={story.title}
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover bg-neutral-900 border border-neutral-800 shrink-0"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-bold text-white leading-normal truncate max-w-[150px] sm:max-w-[240px] md:max-w-xs">
+                          {story.title}
+                        </h4>
+                        <p className="text-[10px] text-neutral-400 mt-0.5 truncate">
+                          By <span className="text-purple-400 font-semibold">{story.creatorName}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Simple play/pause and tag for mobile next to the title (right-aligned in parent row) */}
+                    <div className="flex items-center gap-2 md:hidden">
+                      <span className="text-[9px] font-mono font-bold text-teal-400 bg-teal-950/40 border border-teal-900/20 px-1.5 py-0.5 rounded shrink-0">
+                        ${story.symbol}
+                      </span>
+                      <button
+                        onClick={() => handlePlayPause(story)}
+                        className="w-8 h-8 bg-white text-neutral-950 rounded-full flex items-center justify-center shadow-lg active:scale-95 shrink-0"
+                      >
+                        {isPlaying ? (
+                          <Pause className="w-3.5 h-3.5 fill-neutral-950" />
+                        ) : (
+                          <Play className="w-3.5 h-3.5 fill-neutral-950 ml-0.5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                {/* Scrubber controls */}
-                <div className="flex-1 flex items-center gap-3 w-full max-w-xl">
-                  <span className="font-mono text-[10px] text-neutral-400">
-                    {formatSecs(currentTime)}
-                  </span>
-                  <input
-                    type="range"
-                    min="0"
-                    max={duration || 100}
-                    value={currentTime}
-                    onChange={handleScrub}
-                    className="flex-1 h-1 bg-neutral-800 accent-purple-500 rounded-lg cursor-pointer"
-                  />
-                  <span className="font-mono text-[10px] text-neutral-400">
-                    {formatSecs(duration)}
-                  </span>
-                </div>
+                  {/* Scrubber controls (Hidden on mobile, elegant inline design on desktop) */}
+                  <div className="hidden md:flex flex-1 items-center gap-3 w-full max-w-xl">
+                    <span className="font-mono text-[10px] text-neutral-400">
+                      {formatSecs(currentTime)}
+                    </span>
+                    <input
+                      type="range"
+                      min="0"
+                      max={duration || 100}
+                      value={currentTime}
+                      onChange={handleScrub}
+                      className="flex-1 h-1 bg-neutral-800 accent-purple-500 rounded-lg cursor-pointer"
+                    />
+                    <span className="font-mono text-[10px] text-neutral-400">
+                      {formatSecs(duration)}
+                    </span>
+                  </div>
 
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => handlePlayPause(story)}
-                    className="w-10 h-10 bg-white hover:bg-neutral-100 text-neutral-950 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95"
-                  >
-                    {isPlaying ? (
-                      <Pause className="w-4 h-4 fill-neutral-950" />
-                    ) : (
-                      <Play className="w-4 h-4 fill-neutral-950 ml-0.5" />
-                    )}
-                  </button>
-                  <span className="text-[10px] font-mono font-bold text-teal-400 bg-teal-950/40 border border-teal-900/30 px-2 py-1 rounded">
-                    ${story.symbol} Key Connected
-                  </span>
-                </div>
-              </>
-            );
-          })()}
+                  {/* Right: Controls (Hidden on mobile, standard row on desktop) */}
+                  <div className="hidden md:flex items-center gap-3 shrink-0">
+                    <button
+                      onClick={() => handlePlayPause(story)}
+                      className="w-10 h-10 bg-white hover:bg-neutral-100 text-neutral-950 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95"
+                    >
+                      {isPlaying ? (
+                        <Pause className="w-4 h-4 fill-neutral-950" />
+                      ) : (
+                        <Play className="w-4 h-4 fill-neutral-950 ml-0.5" />
+                      )}
+                    </button>
+                    <span className="text-[10px] font-mono font-bold text-teal-400 bg-teal-950/40 border border-teal-900/30 px-2.5 py-1 rounded">
+                      ${story.symbol} Key Connected
+                    </span>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
         </div>
       )}
     </div>

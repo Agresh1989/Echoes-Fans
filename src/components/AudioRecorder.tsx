@@ -41,6 +41,14 @@ export default function AudioRecorder({
   const [solanaSignature, setSolanaSignature] = useState("");
   const [supply, setSupply] = useState(100);
   const [royaltyFee, setRoyaltyFee] = useState(5);
+  const [studioMessage, setStudioMessage] = useState<{ text: string; type: "error" | "success" } | null>(null);
+
+  const showStudioFeedback = (text: string, type: "error" | "success" = "error") => {
+    setStudioMessage({ text, type });
+    setTimeout(() => {
+      setStudioMessage(null);
+    }, 5000);
+  };
 
   // Audio Wave visualizer
   const [audioLevels, setAudioLevels] = useState<number[]>(Array(30).fill(10));
@@ -223,7 +231,7 @@ export default function AudioRecorder({
         setAudioUrl(URL.createObjectURL(file));
         setRecordingDuration(120); // mock duration estimate
       } else {
-        alert("Please drop a valid audio file.");
+        showStudioFeedback("Please drop a valid audio file.", "error");
       }
     }
   };
@@ -240,11 +248,11 @@ export default function AudioRecorder({
   // AI Audio Suite API call
   const runAIEnhancer = async (type: "enhance" | "summarize") => {
     if (!title) {
-      alert("Please provide a story title before running AI tools.");
+      showStudioFeedback("Please provide a story title before running AI tools.", "error");
       return;
     }
     if (!transcript) {
-      alert("Please enter a rough transcription or voice prompt script.");
+      showStudioFeedback("Please enter a rough transcription or voice prompt script.", "error");
       return;
     }
 
@@ -289,12 +297,12 @@ export default function AudioRecorder({
     }
 
     if (!title) {
-      alert("Title is required to mint.");
+      showStudioFeedback("Title is required to mint.", "error");
       return;
     }
 
     if (wallet.balance < 0.05) {
-      alert("Insufficient Solana devnet SOL. Please request a faucet airdrop in your wallet drawer.");
+      showStudioFeedback("Insufficient Solana devnet SOL. Please request a faucet airdrop in your wallet drawer.", "error");
       return;
     }
 
@@ -370,15 +378,15 @@ export default function AudioRecorder({
   return (
     <div className="bg-neutral-900/50 border border-neutral-800 rounded-3xl p-6 md:p-8 backdrop-blur-sm" id="creator-studio">
       {/* Title */}
-      <div className="flex items-center justify-between mb-8 pb-4 border-b border-neutral-800">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 pb-6 border-b border-neutral-800">
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">Audio Creator Studio</h2>
           <p className="text-neutral-400 text-xs mt-1">Record your narrative, enhance with Gemini AI, and mint permanent Solana NFTs.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full lg:w-auto">
           <button
             onClick={() => setActiveStep("record")}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+            className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
               activeStep === "record"
                 ? "bg-purple-600 text-white shadow-lg shadow-purple-600/15"
                 : "text-neutral-400 hover:text-white"
@@ -389,13 +397,13 @@ export default function AudioRecorder({
           <button
             onClick={() => {
               if (!audioBlob) {
-                alert("Please record or upload an audio file first.");
+                showStudioFeedback("Please record or upload an audio file first.", "error");
                 return;
               }
               setActiveStep("ai-tools");
             }}
             disabled={!audioBlob}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 ${
+            className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 ${
               activeStep === "ai-tools"
                 ? "bg-purple-600 text-white shadow-lg shadow-purple-600/15"
                 : "text-neutral-400 hover:text-white"
@@ -406,13 +414,13 @@ export default function AudioRecorder({
           <button
             onClick={() => {
               if (!audioBlob) {
-                alert("Please record or upload an audio file first.");
+                showStudioFeedback("Please record or upload an audio file first.", "error");
                 return;
               }
               setActiveStep("mint");
             }}
             disabled={!audioBlob}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 ${
+            className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 ${
               activeStep === "mint"
                 ? "bg-purple-600 text-white shadow-lg shadow-purple-600/15"
                 : "text-neutral-400 hover:text-white"
@@ -422,6 +430,18 @@ export default function AudioRecorder({
           </button>
         </div>
       </div>
+
+      {/* Dynamic Studio Feedback message indicator */}
+      {studioMessage && (
+        <div className={`p-4 rounded-2xl border text-xs font-semibold leading-relaxed mb-6 flex items-center gap-3 ${
+          studioMessage.type === "error"
+            ? "bg-red-500/10 border-red-500/20 text-red-300"
+            : "bg-teal-500/10 border-teal-500/20 text-teal-300"
+        }`}>
+          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${studioMessage.type === "error" ? "bg-red-500" : "bg-teal-400"}`} />
+          <p>{studioMessage.text}</p>
+        </div>
+      )}
 
       {/* Step 1: Record and Details */}
       {activeStep === "record" && (

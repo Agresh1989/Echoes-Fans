@@ -32,6 +32,14 @@ export default function Competitions({
   const [selectedCompId, setSelectedCompId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
+  const [compMessage, setCompMessage] = useState<{ text: string; type: "error" | "success" } | null>(null);
+
+  const showCompFeedback = (text: string, type: "error" | "success" = "error") => {
+    setCompMessage({ text, type });
+    setTimeout(() => {
+      setCompMessage(null);
+    }, 5000);
+  };
 
   // Submit story handler
   const handleSubmitEntry = (e: React.FormEvent) => {
@@ -42,7 +50,7 @@ export default function Competitions({
     }
 
     if (!selectedStoryId || !selectedCompId) {
-      alert("Please select both an audio story and a challenge.");
+      showCompFeedback("Please select both an audio story and a challenge.", "error");
       return;
     }
 
@@ -51,6 +59,7 @@ export default function Competitions({
       onSubmitToCompetition(selectedStoryId, selectedCompId);
       setIsSubmitting(false);
       setSubmittedSuccess(true);
+      showCompFeedback("Success! Submitted your tokenized story key to the challenge pool.", "success");
       setTimeout(() => {
         setSubmittedSuccess(false);
         setSelectedStoryId("");
@@ -69,12 +78,12 @@ export default function Competitions({
 
     const prizeNum = Number(prize);
     if (!sponsorName || !theme || isNaN(prizeNum) || prizeNum <= 0) {
-      alert("Please enter valid details and sponsor prize pool amount.");
+      showCompFeedback("Please enter valid details and sponsor prize pool amount.", "error");
       return;
     }
 
     if (wallet.balance < prizeNum) {
-      alert(`Insufficient balance. Launching this challenge requires funding the ${prizeNum} SOL pool directly from your wallet.`);
+      showCompFeedback(`Insufficient balance. Launching this challenge requires funding the ${prizeNum} SOL pool directly from your wallet.`, "error");
       return;
     }
 
@@ -98,11 +107,23 @@ export default function Competitions({
     setTheme("");
     setPrize("10");
     setDescription("");
-    alert(`Success! Successfully created and funded the ${theme} challenge with ${prizeNum} SOL.`);
+    showCompFeedback(`Success! Successfully created and funded the ${theme} challenge with ${prizeNum} SOL.`, "success");
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-8" id="competitions-portal">
+    <div className="flex flex-col gap-6" id="competitions-view-root">
+      {compMessage && (
+        <div className={`p-4 rounded-2xl border text-xs font-semibold leading-relaxed flex items-center gap-3 animate-pulse ${
+          compMessage.type === "error"
+            ? "bg-red-500/10 border-red-500/20 text-red-300"
+            : "bg-teal-500/10 border-teal-500/20 text-teal-300"
+        }`}>
+          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${compMessage.type === "error" ? "bg-red-500" : "bg-teal-400"}`} />
+          <p>{compMessage.text}</p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8" id="competitions-portal">
       {/* Left side: Competition cards */}
       <div className="md:col-span-7 flex flex-col gap-6">
         <div className="flex items-center justify-between">
@@ -349,6 +370,7 @@ export default function Competitions({
           </form>
         </div>
       </div>
+    </div>
     </div>
   );
 }
